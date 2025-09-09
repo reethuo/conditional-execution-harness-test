@@ -38,16 +38,11 @@
       ansible.builtin.debug:
         msg: "Installing Java package: {{ java_package }}"
 
-    - name: Install Java
-      ansible.builtin.dnf:
-        name: "{{ java_package }}"
-        state: present
-
-    - name: Verify Java installation
+    - name: Check available Java packages in Adoptium repo
       ansible.builtin.shell:
-        cmd: java -version
-      register: java_version_output
+        cmd: dnf search temurin | grep -i jdk || dnf search java | grep -i openjdk
+      register: available_java_packages
 
-    - name: Display Java version
+    - name: Display available Java packages
       ansible.builtin.debug:
-        msg: "Java version installed: {{ java_version_output.stdout }}"
+        var: available_java_packages.stdout_lines
