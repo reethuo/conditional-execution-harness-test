@@ -2,10 +2,10 @@
 - hosts: all
   become: yes
   vars:
-    java_version: java-1.8.0-openjdk
+    java_package: "{{ java_version | default('java-17-openjdk-devel') }}"
   tasks:
-    - name: Install tools
-      yum:
+    - name: Install basic tools
+      ansible.builtin.dnf:
         name:
           - yum-utils
           - wget
@@ -17,19 +17,29 @@
         state: present
         update_cache: true
 
-    - name: Enable AppStream repository
-      ansible.builtin.shell: |
-        sudo dnf config-manager --set-enabled crb
+    - name: Enable CRB repository
+      ansible.builtin.shell:
+        cmd: sudo dnf config-manager --set-enabled crb
+      ignore_errors: yes
 
     - name: Update dnf cache
       ansible.builtin.dnf:
         update_cache: yes
 
-    - name: Check available Java packages
-      ansible.builtin.shell:
-        cmd: dnf search openjdk | grep java- | head -10
-      register: available_java
-
-    - name: Display available Java packages
+    - name: Debug Java package choice
       ansible.builtin.debug:
-        var: available_java.stdout_lines
+        msg: "Installing Java package: {{ java_package }}"
+
+    - name: Install Java based on environment variable
+      ansible.builtin.dnf:
+        name: "{{ java_package }}"
+        state: present
+
+    - name: Verify Java installation
+      ansible.builtin.shell:
+        cmd: java -version
+      register: java_version_output
+
+    - name: Display Java version
+      ansible.builtin.debug:
+        msg: "Java version installed: {{ java_version_output.stdout }}"
