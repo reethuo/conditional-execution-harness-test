@@ -17,7 +17,17 @@
         state: present
         update_cache: true
 
+    - name: Enable AppStream repository
+      ansible.builtin.shell: |
+        sudo dnf config-manager --set-enabled AppStream
+      args:
+        warn: false
+
+    - name: Update dnf cache
+      ansible.builtin.dnf:
+        update_cache: yes
+
     - name: Install Java
-      yum:
+      ansible.builtin.dnf:
         name: "{{ java_version }}"
         state: present
