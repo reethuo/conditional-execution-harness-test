@@ -2,7 +2,7 @@
 - hosts: all
   become: yes
   vars:
-    java_package: "{{ java_version | default('java-17-openjdk-devel') }}"
+    java_package: "{{ java_version | default('java-21-openjdk-devel') }}"
   tasks:
     - name: Install basic tools
       ansible.builtin.dnf:
@@ -22,6 +22,14 @@
         cmd: sudo dnf config-manager --set-enabled crb
       ignore_errors: yes
 
+    - name: Add Universal Java Repository (Adoptium)
+      ansible.builtin.shell:
+        cmd: |
+          dnf install -y wget
+          wget -O /etc/yum.repos.d/adoptium.repo https://packages.adoptium.net/artifactory/api/rpm/rhel/adoptium.repo
+          rpm --import https://packages.adoptium.net/artifactory/api/gpg/key/public
+          dnf update -y
+
     - name: Update dnf cache
       ansible.builtin.dnf:
         update_cache: yes
@@ -30,7 +38,7 @@
       ansible.builtin.debug:
         msg: "Installing Java package: {{ java_package }}"
 
-    - name: Install Java based on environment variable
+    - name: Install Java
       ansible.builtin.dnf:
         name: "{{ java_package }}"
         state: present
