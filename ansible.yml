@@ -25,7 +25,11 @@
       ansible.builtin.dnf:
         update_cache: yes
 
-    - name: Install Java
-      ansible.builtin.dnf:
-        name: "{{ java_version }}"
-        state: present
+    - name: Check available Java packages
+      ansible.builtin.shell:
+        cmd: dnf search openjdk | grep java- | head -10
+      register: available_java
+
+    - name: Display available Java packages
+      ansible.builtin.debug:
+        var: available_java.stdout_lines
