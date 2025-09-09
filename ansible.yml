@@ -19,7 +19,7 @@
 
     - name: Enable AppStream repository
       ansible.builtin.shell: |
-        sudo dnf config-manager --set-enabled AppStream
+        sudo dnf config-manager --set-enabled crb
 
     - name: Update dnf cache
       ansible.builtin.dnf:
